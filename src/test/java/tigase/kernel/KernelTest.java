@@ -124,6 +124,9 @@ public class KernelTest {
 		assertNull(b3.getBean41());
 		assertNull(b2.getBean4());
 
+		assertNotNull(b1.getBean2());
+		assertNotNull(b1.getBean3());
+
 		assertEquals(2, b1.getTableOfSpecial().length);
 
 		assertEquals(2, b1.getCollectionOfSpecial().size());

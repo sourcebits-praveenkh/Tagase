@@ -220,7 +220,7 @@ public class Kernel {
 	}
 
 	protected void initBean(BeanConfig tmpBC, Set<BeanConfig> createdBeansConfig, int deep) throws IllegalAccessException,
-	IllegalArgumentException, InvocationTargetException, InstantiationException {
+			IllegalArgumentException, InvocationTargetException, InstantiationException {
 		final BeanConfig beanConfig = tmpBC instanceof DelegatedBeanConfig ? ((DelegatedBeanConfig) tmpBC).original : tmpBC;
 
 		if (beanConfig.getState() == State.initialized)
@@ -278,7 +278,7 @@ public class Kernel {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void inject(Object[] data, Dependency dependency, Object toBean) throws IllegalAccessException,
-	IllegalArgumentException, InvocationTargetException, InstantiationException {
+			IllegalArgumentException, InvocationTargetException, InstantiationException {
 
 		if (!dependency.isNullAllowed() && data == null)
 			throw new KernelException("Can't inject <null> to field " + dependency.getField());
@@ -442,6 +442,12 @@ public class Kernel {
 	public void unregister(final String beanName) {
 		if (log.isLoggable(Level.FINER))
 			log.finer("[" + getName() + "] Unregistering bean " + beanName);
+		BeanConfig unregisteredBeanConfig = dependencyManager.getBeanConfig(beanName);
+		if (unregisteredBeanConfig.getKernel() != this) {
+			unregisteredBeanConfig.getKernel().unregister(beanName);
+			return;
+		}
+
 		unregisterInt(beanName);
 		try {
 			for (BeanConfig bc : dependencyManager.getBeanConfigs()) {
@@ -449,19 +455,20 @@ public class Kernel {
 					continue;
 				Object ob = bc.getKernel().getInstance(bc);
 				for (Dependency d : bc.getFieldDependencies().values()) {
-					BeanConfig[] cbcs = dependencyManager.getBeanConfig(d);
+					if (DependencyManager.match(d, unregisteredBeanConfig)) {
+						BeanConfig[] cbcs = dependencyManager.getBeanConfig(d);
+						if (cbcs.length == 1) {// Clearing single-instance
+							// dependency. Like single field.
+							// BeanConfig cbc = cbcs[0];
+							// if (cbc != null && cbc.equals(removingBC)) {
+							inject(null, d, ob);
+							// }
+						} else if (cbcs.length > 1) { // Clearing multi-instance
+							// dependiency. Like
+							// collections and arrays.
 
-					if (cbcs.length == 1) {// Clearing single-instance
-						// dependency. Like single field.
-						// BeanConfig cbc = cbcs[0];
-						// if (cbc != null && cbc.equals(removingBC)) {
-						inject(null, d, ob);
-						// }
-					} else if (cbcs.length > 1) { // Clearing multi-instance
-						// dependiency. Like
-						// collections and arrays.
-
-						injectDependencies(ob, d, new HashSet<BeanConfig>(), 0);
+							injectDependencies(ob, d, new HashSet<BeanConfig>(), 0);
+						}
 					}
 				}
 			}

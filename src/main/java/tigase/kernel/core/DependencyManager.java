@@ -25,6 +25,15 @@ public class DependencyManager {
 		return fields.toArray(new Field[] {});
 	}
 
+	public static boolean match(Dependency dependency, BeanConfig beanConfig) {
+		if (dependency.getBeanName() != null) {
+			return beanConfig.getBeanName().equals(dependency.getBeanName());
+		} else if (dependency.getType() != null) {
+			return dependency.getType().isAssignableFrom(beanConfig.getClazz());
+		} else
+			throw new RuntimeException("Unsupported dependecy type.");
+	}
+
 	private final Map<String, BeanConfig> beanConfigs = new HashMap<String, BeanConfig>();
 
 	private DependencyManager parent;
@@ -162,4 +171,5 @@ public class DependencyManager {
 	public BeanConfig unregister(String beanName) {
 		return beanConfigs.remove(beanName);
 	}
+
 }
