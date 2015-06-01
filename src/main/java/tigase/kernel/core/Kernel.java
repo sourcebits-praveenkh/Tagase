@@ -245,7 +245,8 @@ public class Kernel {
 
 		BeanConfigurator beanConfigurator;
 		try {
-			if (!beanConfig.getBeanName().equals(BeanConfigurator.DEFAULT_CONFIGURATOR_NAME))
+			if (isBeanClassRegistered(BeanConfigurator.DEFAULT_CONFIGURATOR_NAME)
+					&& !beanConfig.getBeanName().equals(BeanConfigurator.DEFAULT_CONFIGURATOR_NAME))
 				beanConfigurator = getInstance(BeanConfigurator.DEFAULT_CONFIGURATOR_NAME);
 			else
 				beanConfigurator = null;
@@ -334,8 +335,7 @@ public class Kernel {
 				}
 				Object beanToInject = b.getKernel().getInstance(b);
 				// if (beanToInject != null)
-				if (!dataToInject.contains(beanToInject))
-					dataToInject.add(beanToInject);
+				dataToInject.add(beanToInject);
 			}
 		}
 		Object[] d;
@@ -375,8 +375,12 @@ public class Kernel {
 		}
 	}
 
-	public boolean isBeanClassRegistered(String beanName) {
-		return dependencyManager.isBeanClassRegistered(beanName);
+	public boolean isBeanClassRegistered(final String beanName) {
+		boolean x = dependencyManager.isBeanClassRegistered(beanName);
+		if (x == false && parent != null) {
+			x = parent.isBeanClassRegistered(beanName);
+		}
+		return x;
 	}
 
 	public void ln(String exportingBeanName, Kernel destinationKernel, String destinationName) {
