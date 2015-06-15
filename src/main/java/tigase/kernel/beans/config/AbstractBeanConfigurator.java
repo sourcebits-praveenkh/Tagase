@@ -17,7 +17,7 @@ public abstract class AbstractBeanConfigurator implements BeanConfigurator {
 
 	private final ConcurrentHashMap<BeanConfig, HashMap<Field, Object>> defaultFieldValues = new ConcurrentHashMap<BeanConfig, HashMap<Field, Object>>();
 
-	@Inject(nullAllowed = false)
+	@Inject(bean = "kernel", nullAllowed = false)
 	private Kernel kernel;
 
 	@Override

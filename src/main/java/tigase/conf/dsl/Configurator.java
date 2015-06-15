@@ -318,7 +318,9 @@ public class Configurator {
 					krnl.ln(name, krnl.getParent(), name);
 				}
 			};
-			parentKernel.registerBean(name + "#KERNEL").asClass(RegistrarKernel.class).exec();
+			RegistrarKernel k = new RegistrarKernel();
+			parentKernel.registerBean(name + "#KERNEL").asInstance(k).exec();
+			reg.register(k);
 			parentKernel.registerBean(name).asInstance(reg).exec();
 			return null;
 		}
