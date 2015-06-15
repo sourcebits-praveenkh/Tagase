@@ -319,6 +319,7 @@ public class Configurator {
 				}
 			};
 			RegistrarKernel k = new RegistrarKernel();
+			k.setName(name);
 			parentKernel.registerBean(name + "#KERNEL").asInstance(k).exec();
 			reg.register(k);
 			parentKernel.registerBean(name).asInstance(reg).exec();
